@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CPU Scheduling Simulator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="page-shell">
+    <section class="hero">
+      <p class="eyebrow">OPERATING SYSTEMS LAB</p>
+      <h1>CPU Scheduling Simulator</h1>
+    </section>
+
+    <section class="workspace">
+      <form id="scheduler-form" class="control-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">INPUT</p>
+            <h2>Process configuration</h2>
+          </div>
+          <button type="button" id="reset-button" class="button button-ghost">รีเซ็ต</button>
+        </div>
+
+        <div class="field-row">
+          <label for="algorithm">Algorithm</label>
+          <select id="algorithm">
+            <option value="fcfs">FCFS</option>
+            <option value="sjf">SJF</option>
+            <option value="rr">Round Robin</option>
+          </select>
+          <label for="quantum" id="quantum-label" class="quantum-field is-hidden">Time Quantum</label>
+          <input id="quantum" class="quantum-field is-hidden" type="number" min="1" step="1" value="3">
+        </div>
+
+        <div class="process-header" aria-hidden="true">
+          <span>Process</span><span>Arrival Time</span><span>Burst Time</span><span></span>
+        </div>
+        <div id="process-list"></div>
+        <button type="button" id="add-process" class="button button-secondary">+ เพิ่มโปรเซส</button>
+        <button type="submit" class="button button-primary">คำนวณผลลัพธ์</button>
+        <p id="error-message" class="error-message" role="alert"></p>
+      </form>
+
+      <section id="result-panel" class="result-panel" aria-live="polite">
+        <div class="result-heading">
+          <div>
+            <p class="eyebrow">RESULT</p>
+            <h2 id="result-title">ผลลัพธ์การจัดตาราง</h2>
+          </div>
+          <div class="average-card">
+            <span>Average WT</span>
+            <strong id="average-wt">-</strong>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Process</th><th>AT</th><th>BT</th><th>ST</th><th>CT</th><th>TAT</th><th>WT</th>
+              </tr>
+            </thead>
+            <tbody id="result-body"></tbody>
+          </table>
+        </div>
+        <div class="execution-box">
+          <span>Execution order</span>
+          <strong id="execution-order">-</strong>
+        </div>
+      </section>
+    </section>
+  </main>
+  <script src="scheduler.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
