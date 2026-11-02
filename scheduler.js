@@ -89,7 +89,7 @@ function calculateMetrics(processes) {
   return { processes: rows, avgWT };
 }
 
-function result(algorithm, metrics, executionOrder) {
+function result(algorithm, metrics, executionOrder, timeline) {
   return {
     algorithm,
     processes: metrics.processes.map(
@@ -103,7 +103,12 @@ function result(algorithm, metrics, executionOrder) {
     ),
     avgWT: metrics.avgWT,
     AVG_WT: metrics.avgWT,
-    ...(executionOrder ? { executionOrder } : {})
+    ...(executionOrder ? { executionOrder } : {}),
+    timeline: timeline ?? metrics.processes.map((process) => ({
+      id: process.id,
+      start: process.ST,
+      end: process.CT
+    }))
   };
 }
 
@@ -173,6 +178,7 @@ function roundRobin(processes, quantum) {
   );
   const queue = [];
   const executionOrder = [];
+  const timeline = [];
   let nextArrival = 0;
   let currentTime = 0;
   let completed = 0;
@@ -202,6 +208,7 @@ function roundRobin(processes, quantum) {
     currentTime += slice;
     process.remainingTime -= slice;
     executionOrder.push(process.id);
+    timeline.push({ id: process.id, start: currentTime - slice, end: currentTime });
     addArrivals();
 
     if (process.remainingTime > 0) {
@@ -213,10 +220,27 @@ function roundRobin(processes, quantum) {
   }
 
   const metrics = calculateMetrics(pending);
-  return result("Round Robin", metrics, executionOrder);
+  return result("Round Robin", metrics, executionOrder, timeline);
 }
 
-const Scheduler = { fcfs, sjf, roundRobin, calculateMetrics };
+/**
+ * Runs the algorithm selected by the UI.
+ */
+function runScheduler(algorithm, processes, quantum) {
+  switch (algorithm) {
+    case "fcfs":
+      return fcfs(processes);
+    case "sjf":
+      return sjf(processes);
+    case "rr":
+    case "roundRobin":
+      return roundRobin(processes, quantum);
+    default:
+      throw new RangeError(`Unknown scheduling algorithm: ${algorithm}.`);
+  }
+}
+
+const Scheduler = { fcfs, sjf, roundRobin, calculateMetrics, runScheduler };
 
 if (typeof module !== "undefined" && module.exports) {
   module.exports = Scheduler;

@@ -22,6 +22,31 @@ assert.throws(
   /positive integer/
 );
 
+const arrivalProcesses = [
+  { id: "P1", arrivalTime: 3, burstTime: 4 },
+  { id: "P2", arrivalTime: 0, burstTime: 2 },
+  { id: "P3", arrivalTime: 1, burstTime: 1 }
+];
+const arrivalSjf = sjf(arrivalProcesses);
+assert.deepEqual(
+  arrivalSjf.processes.map(({ id, ST, CT, TAT, WT }) => ({
+    id, ST, CT, TAT, WT
+  })),
+  [
+    { id: "P2", ST: 0, CT: 2, TAT: 2, WT: 0 },
+    { id: "P3", ST: 2, CT: 3, TAT: 2, WT: 1 },
+    { id: "P1", ST: 3, CT: 7, TAT: 4, WT: 0 }
+  ]
+);
+const arrivalRr = roundRobin(arrivalProcesses, 2);
+assert.deepEqual(arrivalRr.executionOrder, ["P2", "P3", "P1", "P1"]);
+assert.deepEqual(arrivalRr.timeline, [
+  { id: "P2", start: 0, end: 2 },
+  { id: "P3", start: 2, end: 3 },
+  { id: "P1", start: 3, end: 5 },
+  { id: "P1", start: 5, end: 7 }
+]);
+
 const processes = [
   { id: "P1", burstTime: 5 },
   { id: "P2", burstTime: 3 },

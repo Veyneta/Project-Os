@@ -3,74 +3,170 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CPU Scheduling Simulator</title>
+  <title>CPU Scheduling Lab</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon" aria-label="CPU icon">
+        <svg viewBox="0 0 64 64" role="img" aria-hidden="true">
+          <rect x="17" y="17" width="30" height="30" rx="4"></rect>
+          <rect x="24" y="24" width="16" height="16" rx="2"></rect>
+          <path d="M24 8v9M32 8v9M40 8v9M24 47v9M32 47v9M40 47v9M8 24h9M8 32h9M8 40h9M47 24h9M47 32h9M47 40h9"></path>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-kicker">ห้องทดลองการจัดตาราง CPU</div>
+        <strong>CPU Scheduling Lab · Term Project</strong>
+      </div>
+    </div>
+    <nav class="top-actions" aria-label="เมนูหลัก">
+      <button id="guide-button" class="text-button" type="button">▣ คู่มือสั้น</button>
+    </nav>
+  </header>
+
   <main class="page-shell">
-    <section class="hero">
-      <p class="eyebrow">OPERATING SYSTEMS LAB</p>
-      <h1>CPU Scheduling Simulator</h1>
+    <section class="intro">
+      <p class="status"><span></span> ระบบพร้อมใช้งาน</p>
+      <h1>จำลองการทำงานของ CPU<br><em>Scheduling</em></h1>
+      <p class="intro-copy">ทดลอง ปรับค่า และเห็นผลลัพธ์ของแต่ละอัลกอริทึมแบบทันที</p>
     </section>
 
-    <section class="workspace">
-      <form id="scheduler-form" class="control-panel">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">INPUT</p>
-            <h2>Process configuration</h2>
+    <form id="scheduler-form" novalidate>
+      <section class="setup-grid">
+        <article class="panel process-panel">
+          <div class="panel-heading">
+            <div>
+              <h2>ข้อมูลโปรเซส</h2>
+              <p>กำหนดเวลามาถึง (AT) และเวลาใช้ CPU (BT) ได้เอง</p>
+            </div>
+            <span class="tag">AT ≥ 0</span>
           </div>
-          <button type="button" id="reset-button" class="button button-ghost">รีเซ็ต</button>
-        </div>
-
-        <div class="field-row">
-          <label for="algorithm">Algorithm</label>
-          <select id="algorithm">
-            <option value="fcfs">FCFS</option>
-            <option value="sjf">SJF</option>
-            <option value="rr">Round Robin</option>
-          </select>
-          <label for="quantum" id="quantum-label" class="quantum-field is-hidden">Time Quantum</label>
-          <input id="quantum" class="quantum-field is-hidden" type="number" min="1" step="1" value="3">
-        </div>
-
-        <div class="process-header" aria-hidden="true">
-          <span>Process</span><span>Arrival Time</span><span>Burst Time</span><span></span>
-        </div>
-        <div id="process-list"></div>
-        <button type="button" id="add-process" class="button button-secondary">+ เพิ่มโปรเซส</button>
-        <button type="submit" class="button button-primary">คำนวณผลลัพธ์</button>
-        <p id="error-message" class="error-message" role="alert"></p>
-      </form>
-
-      <section id="result-panel" class="result-panel" aria-live="polite">
-        <div class="result-heading">
-          <div>
-            <p class="eyebrow">RESULT</p>
-            <h2 id="result-title">ผลลัพธ์การจัดตาราง</h2>
+          <div class="process-controls">
+            <div>
+              <span class="muted-label">จำนวนโปรเซส</span>
+              <strong id="process-count">3 / 10</strong>
+            </div>
+            <div class="count-actions">
+              <button id="remove-process" type="button" class="square-button" aria-label="ลดจำนวนโปรเซส">−</button>
+              <button id="add-process" type="button" class="outline-button">＋ เพิ่มโปรเซส</button>
+            </div>
           </div>
-          <div class="average-card">
-            <span>Average WT</span>
-            <strong id="average-wt">-</strong>
+          <div class="process-table">
+            <div class="process-table-head"><span>โปรเซส</span><span>AT · มาถึง</span><span>BT · ใช้ CPU</span></div>
+            <div id="process-list"></div>
           </div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Process</th><th>AT</th><th>BT</th><th>ST</th><th>CT</th><th>TAT</th><th>WT</th>
-              </tr>
-            </thead>
-            <tbody id="result-body"></tbody>
-          </table>
-        </div>
-        <div class="execution-box">
-          <span>Execution order</span>
-          <strong id="execution-order">-</strong>
-        </div>
+          <button id="sort-burst" type="button" class="wide-button">⇄ &nbsp;สุ่มค่า AT และ BT</button>
+        </article>
+
+        <article class="panel algorithm-panel">
+          <div class="panel-heading">
+            <div>
+              <h2>อัลกอริทึม</h2>
+              <p>เลือกวิธีจัดคิวก่อนเริ่มคำนวณ</p>
+            </div>
+            <button type="button" class="outline-button">◷ &nbsp;พร้อมประมวลผล</button>
+          </div>
+          <div class="algorithm-grid" role="radiogroup" aria-label="อัลกอริทึม">
+            <label class="algorithm-card selected"><input type="radio" name="algorithm" value="fcfs" checked><span class="algorithm-code">FCFS</span><strong>มาก่อนได้ก่อน</strong></label>
+            <label class="algorithm-card"><input type="radio" name="algorithm" value="sjf"><span class="algorithm-code">SJF-NP</span><strong>งานสั้นที่สุดก่อน · ไม่แย่งชิง</strong></label>
+            <label class="algorithm-card"><input type="radio" name="algorithm" value="rr"><span class="algorithm-code">RR</span><strong>รอบโรบิน</strong></label>
+          </div>
+          <div class="quantum-row">
+            <label for="quantum">TIME QUANTUM</label>
+            <input id="quantum" type="number" min="1" step="1" value="2">
+            <div class="algorithm-actions">
+              <button type="submit" class="primary-button">▶ &nbsp;เริ่มจำลอง</button>
+              <button id="compare-button" type="button" class="outline-button">♧ &nbsp;เปรียบเทียบทั้งหมด</button>
+            </div>
+          </div>
+        </article>
       </section>
+      <p id="error-message" class="error-message" role="alert"></p>
+    </form>
+
+    <section class="lower-grid">
+      <article class="panel result-preview">
+        <div class="panel-heading">
+          <div>
+            <h2>ผลการจำลอง</h2>
+            <p>แก้ค่า Burst Time แล้วกดเริ่มจำลอง</p>
+          </div>
+        </div>
+        <div id="empty-result" class="empty-result"><div class="chip-icon">▣</div><strong>ยังไม่มีผลลัพธ์</strong><span>แก้ค่า Burst Time แล้วกดเริ่มจำลอง</span></div>
+        <div id="preview-content" class="hidden"></div>
+      </article>
     </section>
+
+    <section class="panel results-panel">
+      <div class="panel-heading">
+        <div><h2>ตารางผลลัพธ์</h2><p>สูตร: TAT = CT − AT · WT = TAT − BT</p></div>
+        <span id="results-status" class="muted-label">ยังไม่มีผลลัพธ์</span>
+      </div>
+      <div id="results-content" class="results-empty">แก้ค่า Burst Time แล้วกดเริ่มจำลอง</div>
+    </section>
+
+    <section class="visual-grid">
+      <article class="panel chart-panel">
+        <div class="panel-heading">
+          <div><h2>Gantt Chart</h2><p>แสดงช่วงเวลาที่ CPU ทำงานกับแต่ละโปรเซส</p></div>
+        </div>
+        <div id="gantt-chart" class="gantt-empty">เริ่มจำลองเพื่อดู Gantt Chart</div>
+      </article>
+      <article class="panel formula-panel">
+        <div class="panel-heading">
+          <div><h2>สูตรคำนวณ</h2><p>สูตรที่ใช้ตรวจสอบผลลัพธ์</p></div>
+        </div>
+        <div class="formula-list">
+          <div><span>Completion Time</span><strong>CT = เวลาที่โปรเซสเสร็จสิ้น</strong></div>
+          <div><span>Turnaround Time</span><strong>TAT = CT − AT</strong></div>
+          <div><span>Waiting Time</span><strong>WT = TAT − BT</strong></div>
+          <div><span>Average Waiting Time</span><strong>AVG WT = ΣWT ÷ จำนวนโปรเซส</strong></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel comparison-panel">
+      <div class="panel-heading">
+        <div><h2>ตารางเปรียบเทียบอัลกอริทึม</h2><p>ค่าเฉลี่ย Waiting Time ที่ต่ำที่สุดถือว่าดีที่สุด</p></div>
+        <span id="best-algorithm" class="best-badge">ยังไม่ได้เปรียบเทียบ</span>
+      </div>
+      <div id="comparison-content" class="results-empty">กด “เปรียบเทียบทั้งหมด” เพื่อดูผลลัพธ์</div>
+    </section>
+
+    <footer><span>CPU Scheduling Lab · Term Project</span><a id="footer-guide-button" href="#">▣ คู่มือสั้น</a></footer>
   </main>
+  <dialog id="guide-dialog" class="guide-dialog" aria-labelledby="guide-title">
+    <div class="guide-header">
+      <div>
+        <p class="eyebrow">QUICK GUIDE</p>
+        <h2 id="guide-title">วิธีใช้งาน CPU Scheduling Lab</h2>
+      </div>
+      <button id="close-guide" class="close-button" type="button" aria-label="ปิดคู่มือ">×</button>
+    </div>
+    <div class="guide-content">
+      <ol>
+        <li>เพิ่มหรือลดจำนวน Process ตามต้องการ</li>
+        <li>กรอก Arrival Time (AT) และ Burst Time (BT)</li>
+        <li>เลือก FCFS, SJF-NP หรือ Round Robin</li>
+        <li>ถ้าเลือก Round Robin ให้กรอก Time Quantum เป็นจำนวนเต็มบวก</li>
+        <li>กด <strong>เริ่มจำลอง</strong> เพื่อดูตารางผลลัพธ์และ Gantt Chart</li>
+        <li>กด <strong>เปรียบเทียบทั้งหมด</strong> เพื่อดูว่า Algorithm ใดมี Average WT ต่ำที่สุด</li>
+      </ol>
+      <div class="guide-note">
+        <strong>สูตรสำคัญ</strong>
+        <span>TAT = CT − AT</span>
+        <span>WT = TAT − BT</span>
+        <span>AVG WT = ΣWT ÷ จำนวน Process</span>
+      </div>
+      <p class="guide-validation">ใช้ปุ่ม <strong>สุ่มค่า AT และ BT</strong> เพื่อสร้างข้อมูลตัวอย่างได้ทันที โดย AT จะอยู่ในช่วง 0–5 และ BT อยู่ในช่วง 1–9</p>
+    </div>
+    <div class="guide-footer">
+      <a href="README.md" target="_blank" rel="noopener">อ่าน README ฉบับเต็ม</a>
+      <button id="guide-start" class="primary-button" type="button">เริ่มใช้งาน</button>
+    </div>
+  </dialog>
   <script src="scheduler.js"></script>
   <script src="app.js"></script>
 </body>
